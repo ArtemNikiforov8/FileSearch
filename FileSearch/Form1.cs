@@ -25,11 +25,12 @@ namespace FileSearch
             InitializeComponent();
         }
 
-        private void ButtonNewSearch_Click(object sender, EventArgs e)
+        private async void ButtonNewSearch_Click(object sender, EventArgs e)
         {
             if (programWorking)
             {
                 cancelTokenSource.Cancel();
+                await Task.Run(() => task.Wait());
             }
             cancelTokenSource = new CancellationTokenSource();
             String directoryName = Path.GetFileName(TextBoxDirectory.Text);

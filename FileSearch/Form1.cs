@@ -25,15 +25,23 @@ namespace FileSearch
             String directoryName = Path.GetFileName(TextBoxDirectory.Text);
             TempPath = TextBoxDirectory.Text;
             FileNameRegex = TextBoxFileName.Text;
-            treeView1.Nodes.Clear();
-            treeView1.Nodes.Add(TempPath, directoryName);
-            DirectoryInfo directory = new DirectoryInfo(TempPath);
-            DirectoryView.ResetCountFiles();
-            Pause = false;
-            time = 0;
-            timer1.Start();
-            Task.Run(() => DirectoryView.CheckDirectory(directory, this));
-            ButtonStop.Enabled = true;
+            if (Directory.Exists(TempPath))
+            {
+                treeView1.Nodes.Clear();
+                treeView1.Nodes.Add(TempPath, directoryName);
+                DirectoryInfo directory = new DirectoryInfo(TempPath);
+                DirectoryView.ResetCountFiles();
+                Pause = false;
+                time = 0;
+                timer1.Start();
+                Task.Run(() => DirectoryView.CheckDirectory(directory, this));
+                ButtonStop.Enabled = true;
+            }
+            else
+            {
+                MessageBox.Show("Неверно задан путь");
+            }
+            
         }
 
         private void ButtonStop_Click(object sender, EventArgs e)
@@ -56,10 +64,6 @@ namespace FileSearch
             LabelTime.Text = String.Format("{0}:{1}", time / 60, time % 60);
         }
 
-        public String TempPath { get; set; }
-        public String FileNameRegex { get; set; }
-        public Boolean Pause { get; set; }
-
         private void Form1_Load(object sender, EventArgs e)
         {
             TextBoxDirectory.Text = Properties.Settings.Default.TextBox_Directory;
@@ -72,5 +76,9 @@ namespace FileSearch
             Properties.Settings.Default.TextBox_FileName = TextBoxFileName.Text;
             Properties.Settings.Default.Save();
         }
+
+        public String TempPath { get; set; }
+        public String FileNameRegex { get; set; }
+        public Boolean Pause { get; set; }
     }
 }

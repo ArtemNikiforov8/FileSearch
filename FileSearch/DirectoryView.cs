@@ -26,14 +26,15 @@ namespace FileSearch
 
         public static async Task CheckDirectory(DirectoryInfo Directory, Form1 Form, CancellationToken Token)
         {
-            await Task.Run(() => checkDirectory(Directory, Form, Token));
+            checkDirectory(Directory, Form, Token);
             if (!Token.IsCancellationRequested)
             {
                 Stop(Form);
             }
+           
         }
 
-        private static async Task checkDirectory(DirectoryInfo Directory, Form1 Form, CancellationToken Token)
+        private static void checkDirectory(DirectoryInfo Directory, Form1 Form, CancellationToken Token)
         {
             try
             {
@@ -60,7 +61,7 @@ namespace FileSearch
                     List<DirectoryInfo> directories = Directory.GetDirectories().ToList();
                     foreach (DirectoryInfo directory in directories)
                     {
-                        await Task.Run(() => checkDirectory(directory, Form, Token));
+                        checkDirectory(directory, Form, Token);
                     }
                 }
             }
@@ -68,11 +69,6 @@ namespace FileSearch
             {
 
             }
-        }
-
-        public static void Abort()
-        {
-            throw new NotImplementedException();
         }
 
         private static void FunctionUpdateLabelDirectory(String Text, Form1 Form)

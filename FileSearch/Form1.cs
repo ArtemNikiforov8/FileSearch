@@ -21,7 +21,6 @@ namespace FileSearch
         public Form1()
         {
             cancelTokenSource = new CancellationTokenSource();
-            Token = cancelTokenSource.Token;
             programWorking = false;
             InitializeComponent();
         }
@@ -31,7 +30,7 @@ namespace FileSearch
             if (programWorking)
             {
                 cancelTokenSource.Cancel();
-                Thread.Sleep(1000);
+                task.Wait();
             }
             cancelTokenSource = new CancellationTokenSource();
             String directoryName = Path.GetFileName(TextBoxDirectory.Text);
@@ -52,7 +51,7 @@ namespace FileSearch
             }
             else
             {
-                MessageBox.Show("Неверно задан путь");
+                MessageBox.Show("Неверно задана стартовая директория");
             }
             
         }
@@ -93,6 +92,5 @@ namespace FileSearch
         public String TempPath { get; set; }
         public String FileNameRegex { get; set; }
         public Boolean Pause { get; set; }
-        public CancellationToken Token { get; set; }
     }
 }

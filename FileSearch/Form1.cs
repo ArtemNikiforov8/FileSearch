@@ -15,13 +15,25 @@ namespace FileSearch
     public partial class Form1 : Form
     {
         private Int32 time;
+        CancellationTokenSource cancelTokenSource;
+        Task task;
+        Boolean programWorking;
         public Form1()
         {
+            cancelTokenSource = new CancellationTokenSource();
+            Token = cancelTokenSource.Token;
+            programWorking = false;
             InitializeComponent();
         }
 
         private void ButtonNewSearch_Click(object sender, EventArgs e)
         {
+            if (programWorking)
+            {
+                cancelTokenSource.Cancel();
+                Thread.Sleep(1000);
+            }
+            cancelTokenSource = new CancellationTokenSource();
             String directoryName = Path.GetFileName(TextBoxDirectory.Text);
             TempPath = TextBoxDirectory.Text;
             FileNameRegex = TextBoxFileName.Text;
@@ -34,7 +46,8 @@ namespace FileSearch
                 Pause = false;
                 time = 0;
                 timer1.Start();
-                Task.Run(() => DirectoryView.CheckDirectory(directory, this));
+                task = Task.Run(() => DirectoryView.CheckDirectory(directory, this, cancelTokenSource.Token));
+                programWorking = true;
                 ButtonStop.Enabled = true;
             }
             else
@@ -80,5 +93,6 @@ namespace FileSearch
         public String TempPath { get; set; }
         public String FileNameRegex { get; set; }
         public Boolean Pause { get; set; }
+        public CancellationToken Token { get; set; }
     }
 }

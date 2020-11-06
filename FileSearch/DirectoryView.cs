@@ -24,40 +24,45 @@ namespace FileSearch
             myDelegateUpdateCountFiles = new DelegateUpdateLabelCountFiles(FunctionUpdateLabelCountFiles);
         }
 
-        public static async Task CheckDirectory(DirectoryInfo Directory, Form1 Form)
+        public static async Task CheckDirectory(DirectoryInfo Directory, Form1 Form, CancellationToken Token)
         {
-            await Task.Run(() => checkDirectory(Directory, Form));
-            Stop(Form);
+            await Task.Run(() => checkDirectory(Directory, Form, Token));
+            if (!Token.IsCancellationRequested)
+            {
+                Stop(Form);
+            }
         }
 
-        private static async Task checkDirectory(DirectoryInfo Directory, Form1 Form)
+        private static async Task checkDirectory(DirectoryInfo Directory, Form1 Form, CancellationToken Token)
         {
             try
             {
-                while (Form.Pause)
+                if (!Token.IsCancellationRequested)
                 {
-                    Thread.Sleep(100);
-                }
-                Form.Invoke(myDelegateUpdateDirectory, Directory.FullName, Form);
-                List<FileInfo> files = new List<FileInfo>();
-                files = Directory.GetFiles().ToList();
-                totalFiles += files.Count();
-                Form.Invoke(myDelegateUpdateCountFiles, matchedFiles, totalFiles, Form);
-                foreach (FileInfo file in files)
-                {
-                    if (Regex.IsMatch(file.Name, Form.FileNameRegex))
+                    while (Form.Pause)
                     {
-                        TreeViewUpdater.AddFileToTreeView(file, Form);
-                        ++matchedFiles;
-                        Form.Invoke(myDelegateUpdateCountFiles, matchedFiles, totalFiles, Form);
+                        Thread.Sleep(100);
+                    }
+                    Form.Invoke(myDelegateUpdateDirectory, Directory.FullName, Form);
+                    List<FileInfo> files = new List<FileInfo>();
+                    files = Directory.GetFiles().ToList();
+                    totalFiles += files.Count();
+                    Form.Invoke(myDelegateUpdateCountFiles, matchedFiles, totalFiles, Form);
+                    foreach (FileInfo file in files)
+                    {
+                        if (Regex.IsMatch(file.Name, Form.FileNameRegex))
+                        {
+                            TreeViewUpdater.AddFileToTreeView(file, Form);
+                            ++matchedFiles;
+                            Form.Invoke(myDelegateUpdateCountFiles, matchedFiles, totalFiles, Form);
+                        }
+                    }
+                    List<DirectoryInfo> directories = Directory.GetDirectories().ToList();
+                    foreach (DirectoryInfo directory in directories)
+                    {
+                        await Task.Run(() => checkDirectory(directory, Form, Token));
                     }
                 }
-                List<DirectoryInfo> directories = Directory.GetDirectories().ToList();
-                foreach (DirectoryInfo directory in directories)
-                {
-                    await Task.Run(() => checkDirectory(directory, Form));
-                }
-            
             }
             catch (Exception exc)
             {
@@ -65,7 +70,7 @@ namespace FileSearch
             }
         }
 
-        private static void Abort()
+        public static void Abort()
         {
             throw new NotImplementedException();
         }

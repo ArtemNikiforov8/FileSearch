@@ -30,7 +30,6 @@ namespace FileSearch
             if (programWorking)
             {
                 cancelTokenSource.Cancel();
-                Thread.Sleep(1000);
             }
             cancelTokenSource = new CancellationTokenSource();
             String directoryName = Path.GetFileName(TextBoxDirectory.Text);
